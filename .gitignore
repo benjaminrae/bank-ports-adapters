@@ -153,3 +153,5 @@ dist
 .webpack/
 
 .DS_Store
+
+.idea/*
