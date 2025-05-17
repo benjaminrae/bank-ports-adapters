@@ -1,23 +1,9 @@
 import { ForPrinting } from "@src/app/driven-ports/ForPrinting/ForPrinting";
 import { BankApp } from "@src/app/BankApp";
 import { ForGettingDatesStub } from "../../doubles/ForGettingDatesStub";
-import { ForGettingDates } from "@src/app/driven-ports/ForGettingDates/ForGettingDates";
 import { Transaction } from "@src/app/driving-ports/ForUsingATMMachine/Transaction";
 import { ForStoringTransactions } from "@src/app/driven-ports/ForStoringTransactions/ForStoringTransactions";
 
-export class ForGettingDatesSpy implements ForGettingDates {
-  private hasBeenCalled: boolean = false;
-
-  public today(): Date {
-    this.hasBeenCalled = true;
-
-    return new Date();
-  }
-
-  public shouldHaveBeenCalled(): void {
-    assert(this.hasBeenCalled, "Expected today() to have been called");
-  }
-}
 
 const forPrintingDummy = null as unknown as ForPrinting;
 
@@ -56,5 +42,22 @@ describe("BankApp", () => {
     bank.deposit(depositAmount);
 
     forStoringTransactionsSpy.shouldHaveSavedTransaction(new Transaction(depositAmount, new Date(depositDate)));
+  });
+
+  it("should store a transaction with the negative amount and date when a withdrawal is made", () => {
+    const forGettingDatesStub = new ForGettingDatesStub();
+    const forStoringTransactionsSpy = new ForStoringTransactionsSpy();
+
+    const bank = new BankApp(forPrintingDummy, forGettingDatesStub, forStoringTransactionsSpy);
+
+    const withdrawalAmount = 500;
+    const withdrawalDate = "2023-10-02";
+    const expectedWithdrawalTransactionAmount = -withdrawalAmount;
+
+    forGettingDatesStub.setToday(new Date(withdrawalDate));
+
+    bank.withdraw(withdrawalAmount);
+
+    forStoringTransactionsSpy.shouldHaveSavedTransaction(new Transaction(expectedWithdrawalTransactionAmount, new Date(withdrawalDate)));
   });
 });

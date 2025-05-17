@@ -25,6 +25,6 @@ export class BankApp implements ForUsingAtmMachine {
   }
 
   public withdraw(amount: number): void {
-    throw new Error("Method not implemented.");
+    this.forStoringTransactions.save(new Transaction(-amount, this.forGettingDates.today()));
   }
 }
