@@ -2,7 +2,9 @@ import { BankApp } from "@src/app/BankApp";
 import { ForPrinting } from "@src/app/driven-ports/ForPrinting/ForPrinting";
 import assert from "node:assert";
 import { ForGettingDatesStub } from "../doubles/ForGettingDatesStub";
-import { ForStoringTransactions } from "@src/app/driven-ports/ForStoringTransactions/ForStoringTransactions";
+import {
+  InMemoryTransactionRepository,
+} from "@src/driven-adapters/ForStoringTransactions/InMemoryTransactionRepository";
 
 class ForPrintingSpy implements ForPrinting {
   private printedStatement?: string;
@@ -28,7 +30,8 @@ describe("Given a client makes a deposit of 1000 on 10-01-2012", () => {
         `, () => {
           const forPrintingSpy = new ForPrintingSpy();
           const forGettingDatesStub = new ForGettingDatesStub();
-          const bank = new BankApp(forPrintingSpy, forGettingDatesStub, null as unknown as ForStoringTransactions);
+          const forStoringTransactionsInMemory = new InMemoryTransactionRepository();
+          const bank = new BankApp(forPrintingSpy, forGettingDatesStub, forStoringTransactionsInMemory);
 
           forGettingDatesStub.setToday(new Date("2012-01-10"));
           bank.deposit(1000);
