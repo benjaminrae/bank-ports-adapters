@@ -1,7 +1,8 @@
 import { BankApp } from "@src/app/BankApp";
 import { ForPrinting } from "@src/app/driven-ports/ForPrinting/ForPrinting";
 import assert from "node:assert";
-import { ForGettingDates } from "../unit/app/BankApp.spec";
+import { ForGettingDatesStub } from "../doubles/ForGettingDatesStub";
+import { ForStoringTransactions } from "@src/app/driven-ports/ForStoringTransactions/ForStoringTransactions";
 
 class ForPrintingSpy implements ForPrinting {
   private printedStatement?: string;
@@ -15,47 +16,35 @@ class ForPrintingSpy implements ForPrinting {
   }
 }
 
-class ForGettingDatesStub implements ForGettingDates {
-  private stubbedToday: Date | undefined;
-
-  public today(): Date {
-    return this.stubbedToday!;
-  }
-
-  setToday(date: Date): void {
-    this.stubbedToday = date;
-  }
-}
-
-describe('Given a client makes a deposit of 1000 on 10-01-2012', () => {
-  describe('And a deposit of 2000 on 13-01-2012', () => {
-    describe('And a withdrawal of 500 on 14-01-2012', () => {
-      describe('When they print their bank statement', () => {
+describe("Given a client makes a deposit of 1000 on 10-01-2012", () => {
+  describe("And a deposit of 2000 on 13-01-2012", () => {
+    describe("And a withdrawal of 500 on 14-01-2012", () => {
+      describe("When they print their bank statement", () => {
         it(`Then they should see the following statement:
           Date       || Amount || Balance
           14/01/2012 || -500   || 2500
           13/01/2012 || 2000   || 3000
           10/01/2012 || 1000   || 1000
         `, () => {
-          const forPrintingSpy = new ForPrintingSpy()
-          const forGettingDatesStub = new ForGettingDatesStub()
-          const bank = new BankApp(forPrintingSpy, forGettingDatesStub)
+          const forPrintingSpy = new ForPrintingSpy();
+          const forGettingDatesStub = new ForGettingDatesStub();
+          const bank = new BankApp(forPrintingSpy, forGettingDatesStub, null as unknown as ForStoringTransactions);
 
-          forGettingDatesStub.setToday(new Date('2012-01-10'))
-          bank.deposit(1000)
-          forGettingDatesStub.setToday(new Date('2012-01-13'))
-          bank.deposit(2000)
-          forGettingDatesStub.setToday(new Date('2012-01-14'))
-          bank.withdraw(500)
+          forGettingDatesStub.setToday(new Date("2012-01-10"));
+          bank.deposit(1000);
+          forGettingDatesStub.setToday(new Date("2012-01-13"));
+          bank.deposit(2000);
+          forGettingDatesStub.setToday(new Date("2012-01-14"));
+          bank.withdraw(500);
 
-          bank.printBankStatement()
+          bank.printBankStatement();
 
           forPrintingSpy.shouldHavePrinted(`Date       || Amount || Balance
           14/01/2012 || -500   || 2500
           13/01/2012 || 2000   || 3000
-          10/01/2012 || 1000   || 1000`)
-        })
-      })
-    })
-  })
-})
+          10/01/2012 || 1000   || 1000`);
+        });
+      });
+    });
+  });
+});
