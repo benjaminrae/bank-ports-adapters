@@ -1,6 +1,7 @@
 import { BankApp } from "@src/app/BankApp";
 import { ForPrinting } from "@src/app/driven-ports/ForPrinting/ForPrinting";
 import assert from "node:assert";
+import { ForGettingDates } from "../unit/app/BankApp.spec";
 
 class ForPrintingSpy implements ForPrinting {
   private printedStatement?: string;
@@ -11,6 +12,18 @@ class ForPrintingSpy implements ForPrinting {
 
   public shouldHavePrinted(statement: string): void {
     assert(this.printedStatement === statement, `Expected "${this.printedStatement}" to be "${statement}"`);
+  }
+}
+
+class ForGettingDatesStub implements ForGettingDates {
+  private stubbedToday: Date | undefined;
+
+  public today(): Date {
+    return this.stubbedToday!;
+  }
+
+  setToday(date: Date): void {
+    this.stubbedToday = date;
   }
 }
 
@@ -25,10 +38,14 @@ describe('Given a client makes a deposit of 1000 on 10-01-2012', () => {
           10/01/2012 || 1000   || 1000
         `, () => {
           const forPrintingSpy = new ForPrintingSpy()
-          const bank = new BankApp(forPrintingSpy)
+          const forGettingDatesStub = new ForGettingDatesStub()
+          const bank = new BankApp(forPrintingSpy, forGettingDatesStub)
 
+          forGettingDatesStub.setToday(new Date('2012-01-10'))
           bank.deposit(1000)
+          forGettingDatesStub.setToday(new Date('2012-01-13'))
           bank.deposit(2000)
+          forGettingDatesStub.setToday(new Date('2012-01-14'))
           bank.withdraw(500)
 
           bank.printBankStatement()
