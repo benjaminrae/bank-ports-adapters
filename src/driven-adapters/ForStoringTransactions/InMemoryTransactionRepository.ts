@@ -7,4 +7,8 @@ export class InMemoryTransactionRepository implements ForStoringTransactions {
   public save(transaction: Transaction): void {
     this.transactions.push(transaction);
   }
+
+  getAll(): Transaction[] {
+    throw new Error("Method not implemented.");
+  }
 }

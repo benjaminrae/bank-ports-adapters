@@ -2,4 +2,6 @@ import { Transaction } from "@src/app/driving-ports/ForUsingATMMachine/Transacti
 
 export interface ForStoringTransactions {
   save(transaction: Transaction): void;
+
+  getAll(): Transaction[];
 }

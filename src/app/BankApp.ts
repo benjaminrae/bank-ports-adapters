@@ -17,7 +17,7 @@ export class BankApp implements ForUsingAtmMachine {
   }
 
   public printBankStatement(): void {
-    throw new Error("Method not implemented.");
+    this.forStoringTransactions.getAll();
   }
 
   public deposit(amount: number): void {

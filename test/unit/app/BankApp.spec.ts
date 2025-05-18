@@ -9,6 +9,12 @@ const forPrintingDummy = null as unknown as ForPrinting;
 
 export class ForStoringTransactionsSpy implements ForStoringTransactions {
   private savedTransactions: Transaction[] = [];
+  private getAllHasBeenCalled = false;
+
+  getAll(): Transaction[] {
+    this.getAllHasBeenCalled = true;
+    return this.savedTransactions;
+  }
 
   save(transaction: Transaction): void {
     this.savedTransactions.push(transaction);
@@ -24,6 +30,10 @@ export class ForStoringTransactionsSpy implements ForStoringTransactions {
       transactionFound,
       `Expected transaction ${transaction} to be included in ${this.savedTransactions}`,
     );
+  }
+
+  public shouldHaveRetrievedTransactions(): void {
+    assert(this.getAllHasBeenCalled, "Expected getAll() to have been called");
   }
 }
 
@@ -59,5 +69,16 @@ describe("BankApp", () => {
     bank.withdraw(withdrawalAmount);
 
     forStoringTransactionsSpy.shouldHaveSavedTransaction(new Transaction(expectedWithdrawalTransactionAmount, new Date(withdrawalDate)));
+  });
+
+  it("should retrieve saved transactions when printing the bank statement", () => {
+    const forGettingDatesDummy = null as unknown as ForGettingDatesStub;
+    const forStoringTransactionsSpy = new ForStoringTransactionsSpy();
+
+    const bank = new BankApp(forPrintingDummy, forGettingDatesDummy, forStoringTransactionsSpy);
+
+    bank.printBankStatement();
+
+    forStoringTransactionsSpy.shouldHaveRetrievedTransactions();
   });
 });
